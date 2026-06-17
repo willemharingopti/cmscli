@@ -16,5 +16,9 @@
      "semiColons": false,
      "lineWidth": 320,
      "indentWidth": 3
-  }
+  },
+  "name": "@willemharingopti/cmscli",
+  "version": "0.1.0",
+  "license": "MIT",
+  "exports": "./cli.ts"
 }
