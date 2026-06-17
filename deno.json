@@ -1,0 +1,20 @@
+{
+  "tasks": {
+    "dev": "deno run -A ./cli.ts",
+    "check": "deno check ./cli.ts",
+    "install": "deno install -A -f -n cms ./cli.ts",
+    "compile": "deno compile -A -o cms ./cli.ts"
+  },
+  "imports": {
+    "@willemharingopti/cmssdk": "jsr:@willemharingopti/cmssdk@^0.0.12",
+    "@cliffy/command": "jsr:@cliffy/command@^1.2.1",
+    "@cliffy/table": "jsr:@cliffy/table@^1.2.1",
+    "@cliffy/prompt": "jsr:@cliffy/prompt@^1.2.1"
+  },
+  "lock": false,
+  "fmt": {
+     "semiColons": false,
+     "lineWidth": 320,
+     "indentWidth": 3
+  }
+}
