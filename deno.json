@@ -2,12 +2,13 @@
   "tasks": {
     "dev": "deno run -A ./cli.ts",
     "check": "deno check ./cli.ts",
-    "install": "deno install -A -f -n cms ./cli.ts",
+    "install": "deno install -g -A -f -c deno.json -n cms ./cli.ts",
     "compile": "deno compile -A -o cms ./cli.ts"
   },
   "imports": {
     "@willemharingopti/cmssdk": "jsr:@willemharingopti/cmssdk@^0.0.12",
     "@cliffy/command": "jsr:@cliffy/command@^1.2.1",
+    "@cliffy/command/completions": "jsr:@cliffy/command@^1.2.1/completions",
     "@cliffy/table": "jsr:@cliffy/table@^1.2.1",
     "@cliffy/prompt": "jsr:@cliffy/prompt@^1.2.1"
   },

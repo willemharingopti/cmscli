@@ -1,4 +1,5 @@
 import { Command } from "@cliffy/command"
+import { CompletionsCommand } from "@cliffy/command/completions"
 import { resources } from "./resources.ts"
 import { buildSdk, type GlobalOptions } from "./config/sdk.ts"
 import { resolveOptions } from "./config/profiles.ts"
@@ -47,6 +48,7 @@ const root = new Command()
    })
 
 root.command("config", configCommand)
+root.command("completions", new CompletionsCommand())
 
 // Build a subcommand tree from the registry: <resource> <verb> [args] [flags].
 for (const resource of resources) {
