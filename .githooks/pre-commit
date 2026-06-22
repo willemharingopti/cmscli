@@ -1,0 +1,8 @@
+#!/bin/sh
+# Auto-bump the patch version in deno.json on every commit, then stage it so
+# the bump lands in the same commit. Configure once with:
+#   git config core.hooksPath .githooks
+set -e
+
+deno run --allow-read --allow-write .githooks/bump-version.ts
+git add deno.json

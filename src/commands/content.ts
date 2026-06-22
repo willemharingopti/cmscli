@@ -61,6 +61,18 @@ export const contentResource: ResourceSpec = {
          ],
       }),
       verb("create", "Create content", [], (sdk, ctx) => sdkContent(sdk)().post(ctx.body), { hasBody: true }),
+      verb(
+         "upload",
+         "Create content with a binary media file (multipart upload). Content metadata is the JSON body; --media points at the file.",
+         [],
+         async (sdk, ctx) => {
+            const mediaPath = ctx.options.media as string | undefined
+            if (!mediaPath) throw new Error("Upload requires a media file. Pass --media <path>.")
+            const file = await Deno.readFile(mediaPath)
+            return sdkContent(sdk)().upload({ content: ctx.body, file })
+         },
+         { hasBody: true, flags: [{ name: "media", description: "Path to the binary media file to upload (the JSON body / -f --file is the content metadata)", type: "string" }] },
+      ),
 
       // ---- by key ----
       verb("get", "Get content by key", [KEY], (sdk, ctx) => sdkContent(sdk)({ key: ctx.args.key }).get()),

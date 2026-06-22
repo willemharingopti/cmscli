@@ -9,6 +9,7 @@ import { render } from "./output/render.ts"
 import { runPaged } from "./pagination.ts"
 import { fail } from "./shared/errors.ts"
 import { runInteractive } from "./interactive/session.ts"
+import denoJson from "../deno.json" with { type: "json" }
 
 // Cliffy camelCases flags, so the parsed options already line up with GlobalOptions.
 const toGlobal = (o: Record<string, unknown>): GlobalOptions => ({
@@ -32,7 +33,7 @@ const toCamel = (kebab: string): string => kebab.replace(/-([a-z])/g, (_, c) => 
 
 const root = new Command()
    .name("cms")
-   .version("0.0.1")
+   .version(denoJson.version)
    .description("CLI for the Optimizely CMS SDK. Run without arguments for interactive mode.")
    .globalOption("--profile <name:string>", "Config profile to use")
    .globalOption("--client-id <id:string>", "OAuth client id (overrides env/profile)")

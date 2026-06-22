@@ -185,6 +185,7 @@ arguments:
 # collection
 cms content list [--locales en --statuses published] [--page-size N]
 cms content create   (body)
+cms content upload   (body) --media <path>   # multipart: JSON metadata + binary file
 
 # by key
 cms content get <key>
@@ -219,6 +220,15 @@ cms content delete-locale <key> <locale>
 
 `--locales` and `--statuses` are repeatable. Valid statuses: `draft`, `ready`,
 `published`, `previous`, `scheduled`, `rejected`, `inReview`.
+
+`upload` creates a content item together with its binary media in a single
+multipart request. The JSON body (via `-d/--data`, `-f/--file` or stdin) is the
+content metadata — the same shape as `create` — while `--media` points at the
+binary file to upload. For example:
+
+```sh
+cms content upload -d '{"contentType":"image"}' --media ./logo.png
+```
 
 ---
 
