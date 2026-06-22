@@ -13,6 +13,27 @@ import type { ResourceSpec, VerbContext, VerbSpec } from "../registry.ts"
 // deno-lint-ignore no-explicit-any
 const sdkContent = (sdk: CmsSdkInstance): any => sdk.content
 
+// Best-effort content type for the uploaded file part, inferred from extension.
+// The filename (not the type) is what the API strictly requires; this just keeps
+// the part's content-type honest. Falls back to a generic binary type.
+const MIME_BY_EXT: Record<string, string> = {
+   png: "image/png",
+   jpg: "image/jpeg",
+   jpeg: "image/jpeg",
+   gif: "image/gif",
+   webp: "image/webp",
+   svg: "image/svg+xml",
+   pdf: "application/pdf",
+   json: "application/json",
+   txt: "text/plain",
+   mp4: "video/mp4",
+   webm: "video/webm",
+}
+const mimeForFile = (filename: string): string => {
+   const ext = filename.includes(".") ? filename.split(".").pop()!.toLowerCase() : ""
+   return MIME_BY_EXT[ext] ?? "application/octet-stream"
+}
+
 const KEY = { name: "key", description: "content key", fromKeys: true }
 const VERSION = { name: "version", description: "version identifier" }
 const LOCALE = { name: "locale", description: "locale (BCP-47, or NEUTRAL)" }
@@ -68,7 +89,13 @@ export const contentResource: ResourceSpec = {
          async (sdk, ctx) => {
             const mediaPath = ctx.options.media as string | undefined
             if (!mediaPath) throw new Error("Upload requires a media file. Pass --media <path>.")
-            const file = await Deno.readFile(mediaPath)
+            const bytes = await Deno.readFile(mediaPath)
+            const filename = mediaPath.split(/[\\/]/).pop() || "upload"
+            // The CMA multipart endpoint requires the `file` part to carry a filename in its
+            // Content-Disposition. The SDK appends body.file to FormData verbatim, so we must
+            // pass a File (a named Blob) — a raw Uint8Array/Blob would ship with no filename
+            // and the API rejects it with "second part must have a FileName".
+            const file = new File([bytes], filename, { type: mimeForFile(filename) })
             return sdkContent(sdk)().upload({ content: ctx.body, file })
          },
          { hasBody: true, flags: [{ name: "media", description: "Path to the binary media file to upload (the JSON body / -f --file is the content metadata)", type: "string" }] },
