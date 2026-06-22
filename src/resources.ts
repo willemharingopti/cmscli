@@ -4,6 +4,23 @@ import { manifestResource } from "./commands/manifest.ts"
 import { contentResource } from "./commands/content.ts"
 import type { ResourceSpec } from "./registry.ts"
 
+// Applications expose their address via `hosts[].authority` rather than a flat
+// `url` field. Surface a readable URL (scheme://authority, comma-joined for
+// multi-host apps) so it can show as a list column.
+// deno-lint-ignore no-explicit-any
+const applicationUrl = (app: any): string => {
+   const hosts: any[] = Array.isArray(app?.hosts) ? app.hosts : []
+   return hosts
+      .map((h) => {
+         const authority = typeof h?.authority === "string" ? h.authority : ""
+         if (!authority) return ""
+         const scheme = typeof h?.preferredUrlScheme === "string" ? h.preferredUrlScheme : ""
+         return scheme ? `${scheme}://${authority}` : authority
+      })
+      .filter(Boolean)
+      .join(", ")
+}
+
 /**
  * The registry of all resources the CLI exposes. Phase 1 covers the 8 standard
  * CRUD domains via the shared factory. propertyformats, manifest and content
@@ -11,7 +28,7 @@ import type { ResourceSpec } from "./registry.ts"
  */
 export const resources: ResourceSpec[] = [
    contentResource,
-   crudResource({ name: "applications", description: "Websites/frontends running on the CMS instance", accessor: (sdk) => sdk.applications }),
+   crudResource({ name: "applications", description: "Websites/frontends running on the CMS instance", accessor: (sdk) => sdk.applications, mapItems: (items) => items.map((i) => ({ ...i, url: applicationUrl(i) })) }),
    crudResource({ name: "blueprints", description: "Reusable Visual Builder layout templates", accessor: (sdk) => sdk.blueprints }),
    crudResource({ name: "contenttypes", description: "Structured definitions for kinds of content", accessor: (sdk) => sdk.contenttypes }),
    crudResource({ name: "sources", description: "Registered external content sources", accessor: (sdk) => sdk.sources }),

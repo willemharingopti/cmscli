@@ -15,6 +15,8 @@ export interface CrudOptions {
    accessor: DomainAccessor
    /** Field used to label items in interactive key pickers. */
    labelField?: string
+   /** Optional transform applied to list items (e.g. to surface a derived column). */
+   mapItems?: (items: any[]) => any[]
 }
 
 const singular = (name: string): string => name.endsWith("s") ? name.slice(0, -1) : name
@@ -44,7 +46,14 @@ export const crudResource = (opts: CrudOptions): ResourceSpec => {
             hasBody: false,
             destructive: false,
             paged: true,
-            run: (sdk, ctx) => accessor(sdk)().list(ctx.query),
+            run: async (sdk, ctx) => {
+               const res = await accessor(sdk)().list(ctx.query)
+               if (!opts.mapItems) return res
+               // Preserve the paged wrapper (totalCount drives the footer); transform items only.
+               if (Array.isArray(res)) return opts.mapItems(res)
+               if (res && Array.isArray(res.items)) return { ...res, items: opts.mapItems(res.items) }
+               return res
+            },
          },
          {
             name: "get",

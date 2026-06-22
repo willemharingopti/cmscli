@@ -3,7 +3,7 @@ import type { GlobalOptions } from "../config/sdk.ts"
 
 // Columns we surface in list tables, in priority order. Only those present on
 // the first item are shown; if none match we fall back to JSON.
-const PREFERRED_COLUMNS = ["key", "displayName", "name", "status", "version", "locale", "contentType", "baseType", "source", "lastModified", "modified", "created"]
+const PREFERRED_COLUMNS = ["key", "displayName", "name", "url", "status", "version", "locale", "contentType", "baseType", "source", "lastModified", "modified", "created"]
 
 /** Pull the array out of a paged response (`{ items }`) or a bare array. */
 const extractItems = (data: unknown): unknown[] | undefined => {
