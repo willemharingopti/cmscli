@@ -98,7 +98,22 @@ export const contentResource: ResourceSpec = {
             const file = new File([bytes], filename, { type: mimeForFile(filename) })
             return sdkContent(sdk)().upload({ content: ctx.body, file })
          },
-         { hasBody: true, flags: [{ name: "media", description: "Path to the binary media file to upload (the JSON body / -f --file is the content metadata)", type: "string" }] },
+         {
+            hasBody: true,
+            flags: [{ name: "media", description: "Path to the binary media file to upload (the JSON body / -f --file is the content metadata)", type: "string" }],
+            examples: [
+               {
+                  name: "Upload an image from the local filesystem",
+                  description: `cms content upload --media ./hero.png \\
+  -d '{"contentType":"ImageFile","container":"<folder-key>","initialVersion":{"displayName":"Hero image"}}'`,
+               },
+               {
+                  name: "Upload an image with metadata from a JSON file",
+                  description: `cms content upload --media ./photos/cat.jpg -f ./cat-metadata.json
+  # cat-metadata.json: {"contentType":"ImageFile","container":"<folder-key>","initialVersion":{"displayName":"Cat"}}`,
+               },
+            ],
+         },
       ),
 
       // ---- by key ----

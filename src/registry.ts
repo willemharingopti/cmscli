@@ -40,6 +40,8 @@ export interface VerbSpec {
    paged?: boolean
    /** Extra non-positional flags this verb accepts. */
    flags?: FlagSpec[]
+   /** Usage examples shown under "Examples:" in the verb's --help output. */
+   examples?: Array<{ name: string; description: string }>
    run: (sdk: CmsSdkInstance, ctx: VerbContext) => Promise<unknown>
 }
 

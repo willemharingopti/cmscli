@@ -1,7 +1,7 @@
 import { Command } from "@cliffy/command"
 import { CompletionsCommand } from "@cliffy/command/completions"
 import { resources } from "./resources.ts"
-import { buildSdk, type GlobalOptions } from "./config/sdk.ts"
+import { buildSdk, type GlobalOptions, type LogLevel, setupLogging } from "./config/sdk.ts"
 import { resolveOptions } from "./config/profiles.ts"
 import { configCommand } from "./commands/config.ts"
 import { resolveBody } from "./input/body.ts"
@@ -20,6 +20,8 @@ const toGlobal = (o: Record<string, unknown>): GlobalOptions => ({
    debug: o.debug as boolean | undefined,
    json: o.json as boolean | undefined,
    quiet: o.quiet as boolean | undefined,
+   logFile: o.logFile as string | undefined,
+   logLevel: o.logLevel as LogLevel | undefined,
    // Profile + env fallbacks are applied later by resolveOptions().
    displayLocale: o.displayLocale as string | undefined,
 })
@@ -41,7 +43,9 @@ const root = new Command()
    .globalOption("--base-url <url:string>", "CMS base URL (overrides env/profile)")
    .globalOption("--json", "Output raw JSON instead of tables")
    .globalOption("--quiet", "Suppress non-essential output")
-   .globalOption("--debug", "Enable SDK debug logging")
+   .globalOption("--debug", "Mirror SDK logs to the console (shorthand for --log-level debug)")
+   .globalOption("--log-file <path:string>", "Write SDK logs to a file")
+   .globalOption("--log-level <level:string>", "Lowest log level to record: trace|debug|info|warning|error|fatal")
    .globalOption("--display-locale <locale:string>", "BCP-47 locale for table dates (e.g. nl-NL); also CMS_DISPLAY_LOCALE")
    .action(async (options) => {
       // No subcommand -> interactive menu.
@@ -77,11 +81,15 @@ for (const resource of resources) {
          else if (flag.type === "array") verbCmd.option(`--${flag.name} <value:string>`, flag.description, { collect: true })
          else verbCmd.option(`--${flag.name} <value:string>`, flag.description)
       }
+      for (const ex of verb.examples ?? []) {
+         verbCmd.example(ex.name, ex.description)
+      }
 
       verbCmd.action(async (options, ...posArgs) => {
          try {
             const opts = options as unknown as Record<string, unknown>
             const global = resolveOptions(toGlobal(opts))
+            await setupLogging(global)
             const sdk = buildSdk(global)
 
             const args: Record<string, string> = {}
